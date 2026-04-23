@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Commandes - Gestion de Stock{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-cart-check"></i> Commandes</h1>
+    {% if user.role == 'admin' or user.role == 'gestionnaire' %}
+    <a href="{% url 'commandes_creer' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Créer une commande
+    </a>
+    {% endif %}
+</div>
+
+<div class="card mb-4 shadow-sm">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <select name="statut" class="form-select">
+                    <option value="">Tous les statuts</option>
+                    <option value="brouillon" {% if statut == 'brouillon' %}selected{% endif %}>Brouillon</option>
+                    <option value="envoye" {% if statut == 'envoye' %}selected{% endif %}>Envoyé</option>
+                    <option value="recu" {% if statut == 'recu' %}selected{% endif %}>Reçu</option>
+                    <option value="annule" {% if statut == 'annule' %}selected{% endif %}>Annulé</option>
+                </select>
+            </div>
+            <div class="col-md-8">
+                <button type="submit" class="btn btn-outline-primary w-100">Filtrer</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-hover shadow-sm">
+        <thead class="table-light">
+            <tr>
+                <th>N° Bon</th>
+                <th>Fournisseur</th>
+                <th>Date</th>
+                <th>Total</th>
+                <th>Statut</th>
+                <th>Créé par</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for bon in bons %}
+            <tr>
+                <td><a href="{% url 'commandes_detail' bon.pk %}"><code>BC-{{ bon.pk|stringformat:"04d" }}</code></a></td>
+                <td>{{ bon.fournisseur.nom }}</td>
+                <td>{{ bon.date_commande|date:"d/m/Y" }}</td>
+                <td>{{ bon.total }} MAD</td>
+                <td>
+                    {% if bon.statut == 'brouillon' %}
+                        <span class="badge bg-secondary">Brouillon</span>
+                    {% elif bon.statut == 'envoye' %}
+                        <span class="badge bg-info">Envoyé</span>
+                    {% elif bon.statut == 'recu' %}
+                        <span class="badge bg-success">Reçu</span>
+                    {% else %}
+                        <span class="badge bg-danger">Annulé</span>
+                    {% endif %}
+                </td>
+                <td>{{ bon.cree_par.get_full_name }}</td>
+                <td>
+                    <a href="{% url 'commandes_detail' bon.pk %}" class="btn btn-sm btn-outline-info">
+                        <i class="bi bi-eye"></i>
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="text-center text-muted">Aucune commande.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

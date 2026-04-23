@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %}Tableau de bord - Gestion de Stock{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">
+    <i class="bi bi-graph-up"></i> Tableau de bord
+</h1>
+
+<div class="row mb-4">
+    <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card card-stat shadow-sm">
+            <div class="card-body">
+                <h6 class="card-title text-muted">Total Produits</h6>
+                <h2 class="text-primary">{{ total_produits }}</h2>
+                <small class="text-muted">dans l'inventaire</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card card-stat shadow-sm">
+            <div class="card-body">
+                <h6 class="card-title text-muted">Valeur du Stock</h6>
+                <h2 class="text-success">{{ valeur_stock }} MAD</h2>
+                <small class="text-muted">valeur totale</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card card-stat shadow-sm">
+            <div class="card-body">
+                <h6 class="card-title text-muted">Stock Bas</h6>
+                <h2 class="low-stock">{{ produits_bas }}</h2>
+                <small class="text-muted">sous le seuil</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card card-stat shadow-sm">
+            <div class="card-body">
+                <h6 class="card-title text-muted">Alertes Ouvertes</h6>
+                <h2 class="text-warning">{{ alertes_ouvertes }}</h2>
+                <a href="{% url 'alertes_liste' %}" class="small">Voir les alertes</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-lg-12">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h6 class="card-title text-muted">Commandes en Cours</h6>
+                <h3 class="text-info">{{ commandes_en_cours }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Mouvements de Stock (7 derniers jours)</h5>
+                <canvas id="mouvementsChart" style="max-height: 300px;"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const ctx = document.getElementById('mouvementsChart').getContext('2d');
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: {{ chart_labels|safe }},
+        datasets: [
+            {
+                label: 'Entrées',
+                data: {{ chart_entrees|safe }},
+                backgroundColor: '#198754',
+                borderColor: '#146c43',
+                borderWidth: 1
+            },
+            {
+                label: 'Sorties',
+                data: {{ chart_sorties|safe }},
+                backgroundColor: '#dc3545',
+                borderColor: '#bb2d3b',
+                borderWidth: 1
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: {
+                position: 'top',
+            },
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

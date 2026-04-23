@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Fournisseurs - Gestion de Stock{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-building"></i> Fournisseurs</h1>
+    {% if user.role == 'admin' or user.role == 'gestionnaire' %}
+    <a href="{% url 'fournisseurs_ajouter' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Ajouter un fournisseur
+    </a>
+    {% endif %}
+</div>
+
+<div class="table-responsive">
+    <table class="table table-hover shadow-sm">
+        <thead class="table-light">
+            <tr>
+                <th>Nom</th>
+                <th>Téléphone</th>
+                <th>Email</th>
+                <th>Adresse</th>
+                <th>Produits</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for fournisseur in fournisseurs %}
+            <tr>
+                <td><strong>{{ fournisseur.nom }}</strong></td>
+                <td>{{ fournisseur.telephone|default:"-" }}</td>
+                <td>{{ fournisseur.email|default:"-" }}</td>
+                <td>{{ fournisseur.adresse|truncatewords:8 }}</td>
+                <td>{{ fournisseur.produits.count }}</td>
+                <td>
+                    {% if user.role == 'admin' or user.role == 'gestionnaire' %}
+                    <a href="{% url 'fournisseurs_modifier' fournisseur.pk %}" class="btn btn-sm btn-outline-warning">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                    {% if user.role == 'admin' %}
+                    <a href="{% url 'fournisseurs_supprimer' fournisseur.pk %}" class="btn btn-sm btn-outline-danger">
+                        <i class="bi bi-trash"></i>
+                    </a>
+                    {% endif %}
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center text-muted">Aucun fournisseur enregistré.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ produit.nom }} - Gestion de Stock{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-lg-8">
+        <h1>{{ produit.nom }}{% if produit.is_low_stock %}<span class="badge bg-danger ms-2">Stock bas</span>{% endif %}</h1>
+        <p class="text-muted">Référence: <code>{{ produit.reference }}</code></p>
+    </div>
+    <div class="col-lg-4 text-lg-end">
+        {% if user.role == 'admin' or user.role == 'gestionnaire' %}
+        <a href="{% url 'produits_modifier' produit.pk %}" class="btn btn-warning">
+            <i class="bi bi-pencil"></i> Modifier
+        </a>
+        {% endif %}
+        <a href="{% url 'produits_liste' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Retour
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Product Details -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Informations</h5>
+                <table class="table table-sm">
+                    <tr>
+                        <td class="fw-bold">Description:</td>
+                        <td>{{ produit.description|truncatewords:20 }}</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold">Catégorie:</td>
+                        <td>{{ produit.categorie.nom }}</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold">Fournisseur:</td>
+                        <td>{{ produit.fournisseur.nom }}</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold">Prix unitaire:</td>
+                        <td>{{ produit.prix }} MAD</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold">Code-barres:</td>
+                        <td>{{ produit.code_barre|default:"-" }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- Stock Levels -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Stock</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="text-muted">Quantité actuelle</p>
+                        <h3 class="{% if produit.is_low_stock %}text-danger{% else %}text-success{% endif %}">
+                            {{ produit.quantite_stock }}
+                        </h3>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="text-muted">Seuil d'alerte</p>
+                        <h3>{{ produit.seuil_alerte }}</h3>
+                    </div>
+                </div>
+                <div class="progress mt-3" style="height: 25px;">
+                    {% widthratio produit.quantite_stock produit.seuil_alerte 100 as progress_percent %}
+                    <div class="progress-bar {% if produit.is_low_stock %}bg-danger{% else %}bg-success{% endif %}"
+                         style="width: {% if progress_percent > 100 %}100{% else %}{{ progress_percent }}{% endif %}%">
+                        {{ progress_percent }}%
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Movements -->
+        {% if mouvements %}
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Mouvements récents</h5>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Quantité</th>
+                                <th>Utilisateur</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for m in mouvements %}
+                            <tr>
+                                <td>{{ m.date|date:"d/m/Y H:i" }}</td>
+                                <td>
+                                    {% if m.type_mouvement == 'entree' %}
+                                        <span class="badge bg-success">Entrée</span>
+                                    {% elif m.type_mouvement == 'sortie' %}
+                                        <span class="badge bg-danger">Sortie</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">Ajustement</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ m.quantite }}</td>
+                                <td>{{ m.utilisateur.get_full_name }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Stock Value -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-body">
+                <h6 class="card-title text-muted">Valeur du stock</h6>
+                <h2 class="text-info">{{ produit.valeur_stock }} MAD</h2>
+            </div>
+        </div>
+
+        <!-- Alerts -->
+        {% if alertes %}
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Alertes</h5>
+                {% for alerte in alertes %}
+                <div class="alert alert-warning mb-2">
+                    <small>{{ alerte.date|date:"d/m/Y H:i" }}</small><br>
+                    {{ alerte.message }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

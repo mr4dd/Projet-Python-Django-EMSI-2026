@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}Alertes - Gestion de Stock{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-exclamation-triangle"></i> Alertes</h1>
+    {% if user.role == 'admin' or user.role == 'gestionnaire' %}
+    <a href="{% url 'alertes_tous_lus' %}" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-check-all"></i> Marquer tous comme lus
+    </a>
+    {% endif %}
+</div>
+
+<div class="card mb-4 shadow-sm">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <select name="is_read" class="form-select">
+                    <option value="">Tous les alertes</option>
+                    <option value="false" {% if is_read == 'false' %}selected{% endif %}>Non lues</option>
+                    <option value="true" {% if is_read == 'true' %}selected{% endif %}>Lues</option>
+                </select>
+            </div>
+            <div class="col-md-8">
+                <button type="submit" class="btn btn-outline-primary w-100">Filtrer</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row">
+    {% for alerte in alertes %}
+    <div class="col-lg-6 mb-3">
+        <div class="card {% if not alerte.is_read %}border-warning{% else %}border-secondary{% endif %} shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h5 class="card-title">
+                            <i class="bi bi-exclamation-circle-fill"></i>
+                            <a href="{% url 'produits_detail' alerte.produit.pk %}">
+                                {{ alerte.produit.nom }}
+                            </a>
+                        </h5>
+                        <p class="card-text">{{ alerte.message }}</p>
+                        <small class="text-muted">
+                            {{ alerte.date|date:"d/m/Y H:i" }}
+                        </small>
+                    </div>
+                    {% if not alerte.is_read %}
+                    <a href="{% url 'alertes_lire' alerte.pk %}" class="btn btn-sm btn-warning">
+                        <i class="bi bi-check"></i> Lire
+                    </a>
+                    {% else %}
+                    <span class="badge bg-secondary">Lue</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> Aucune alerte.
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

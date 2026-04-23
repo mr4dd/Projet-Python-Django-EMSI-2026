@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Gestion de Stock{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body { display: flex; flex-direction: column; min-height: 100vh; }
+        main { flex: 1; }
+        .sidebar { min-height: calc(100vh - 56px); position: sticky; top: 56px; }
+        .nav-link { color: #495057; }
+        .nav-link:hover { color: #0d6efd; background-color: #e9ecef; border-radius: 4px; }
+        .badge-alert { position: absolute; top: 10px; right: 10px; }
+        .low-stock { color: #dc3545; font-weight: bold; }
+        .card-stat { border-left: 4px solid #0d6efd; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-dark bg-dark sticky-top">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'dashboard' %}">
+            <i class="bi bi-box2-fill"></i> GestionStock
+        </a>
+        {% if user.is_authenticated %}
+        <div class="d-flex align-items-center gap-3">
+            {% if alertes_count > 0 %}
+            <a href="{% url 'alertes_liste' %}" class="btn btn-warning btn-sm position-relative">
+                <i class="bi bi-bell-fill"></i> Alertes
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    {{ alertes_count }}
+                </span>
+            </a>
+            {% endif %}
+            <span class="text-white small">{{ user.get_full_name }} ({{ user.role }})</span>
+            <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm">Déconnexion</a>
+        </div>
+        {% endif %}
+    </div>
+</nav>
+
+<div class="container-fluid">
+    <div class="row">
+        {% if user.is_authenticated %}
+        <nav class="col-lg-2 bg-light sidebar py-3">
+            <ul class="nav flex-column">
+                <li class="nav-item mb-2">
+                    <a class="nav-link" href="{% url 'dashboard' %}">
+                        <i class="bi bi-graph-up"></i> Tableau de bord
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a class="nav-link" href="{% url 'produits_liste' %}">
+                        <i class="bi bi-box"></i> Produits
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a class="nav-link" href="{% url 'mouvements_liste' %}">
+                        <i class="bi bi-arrow-left-right"></i> Mouvements
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a class="nav-link" href="{% url 'commandes_liste' %}">
+                        <i class="bi bi-cart-check"></i> Commandes
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a class="nav-link" href="{% url 'fournisseurs_liste' %}">
+                        <i class="bi bi-building"></i> Fournisseurs
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a class="nav-link" href="{% url 'alertes_liste' %}">
+                        <i class="bi bi-exclamation-triangle"></i> Alertes
+                    </a>
+                </li>
+                {% if user.role == 'admin' or user.role == 'gestionnaire' %}
+                <li class="nav-item border-top pt-3">
+                    <h6 class="text-muted px-3">Rapports</h6>
+                </li>
+                <li class="nav-item mb-2">
+                    <a class="nav-link" href="{% url 'rapport_inventaire' %}">
+                        <i class="bi bi-file-pdf"></i> Inventaire PDF
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a class="nav-link" href="{% url 'rapport_mouvements' %}">
+                        <i class="bi bi-file-pdf"></i> Mouvements PDF
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+
+        <main class="{% if user.is_authenticated %}col-lg-10{% else %}col-12{% endif %} py-4">
+            {% if user.is_authenticated and messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</div>
+
+<footer class="bg-light text-center py-3 mt-5 border-top">
+    <small class="text-muted">Système de Gestion de Stock © 2025/2026</small>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

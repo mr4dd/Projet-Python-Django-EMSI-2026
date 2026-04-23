@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}Confirmer la suppression - Gestion de Stock{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card border-danger shadow-sm">
+            <div class="card-body p-4">
+                <h3 class="card-title text-danger mb-3">
+                    <i class="bi bi-exclamation-triangle"></i> Confirmer la suppression
+                </h3>
+                
+                <p class="card-text">
+                    Êtes-vous sûr de vouloir supprimer cette ligne de commande ?<br>
+                    <strong>{{ ligne.produit.nom }}</strong> × {{ ligne.quantite }}
+                </p>
+                
+                <form method="post" class="d-flex gap-2 mt-4">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Supprimer
+                    </button>
+                    <a href="{% url 'commandes_detail' bon.pk %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle"></i> Annuler
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
